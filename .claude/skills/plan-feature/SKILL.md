@@ -1,6 +1,6 @@
 ---
 name: plan-feature
-description: Turn a feature idea or bug into a spec, task breakdown, and acceptance criteria before any code is written. Use whenever the user says plan, design, spec, scope, "how should we build", or asks for a change that touches more than ~3 files, a migration, auth, or infra — even if they don't say "plan".
+description: Claude Code only: Turn a feature idea or bug into a spec, task breakdown, and acceptance criteria before any code is written. Use whenever the user says plan, design, spec, scope, "how should we build", or asks for a change that touches more than ~3 files, a migration, auth, or infra — even if they don't say "plan".
 ---
 # plan-feature
 

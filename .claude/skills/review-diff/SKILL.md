@@ -1,6 +1,6 @@
 ---
 name: review-diff
-description: Review a diff/branch/PR against the project checklist (correctness, tests, security, portability, cost, scope). Use before opening or merging any PR, when the user says review/check/audit my changes, and after any auth, migration, or infra change.
+description: Claude Code only: Review a diff/branch/PR against the project checklist (correctness, tests, security, portability, cost, scope). Use before opening or merging any PR, when the user says review/check/audit my changes, and after any auth, migration, or infra change.
 ---
 # review-diff
 

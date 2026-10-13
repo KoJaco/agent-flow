@@ -72,7 +72,7 @@
       {
         "matcher": "Bash",
         "hooks": [
-          { "type": "command", "command": ".claude/hooks/block-dangerous.sh" }
+          { "type": "command", "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/block-dangerous.sh" }
         ]
       }
     ],
@@ -80,7 +80,7 @@
       {
         "matcher": "Edit|Write|MultiEdit",
         "hooks": [
-          { "type": "command", "command": ".claude/hooks/post-edit.sh" }
+          { "type": "command", "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/post-edit.sh" }
         ]
       }
     ]

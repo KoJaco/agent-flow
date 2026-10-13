@@ -1,6 +1,6 @@
 ---
 name: ship-pr
-description: Run all checks, write the PR description, and flag risks before opening a pull request. Use when the user says ship it, open a PR, ready to merge, or wrap this up.
+description: Claude Code only: Run all checks, write the PR description, and flag risks before opening a pull request. Use when the user says ship it, open a PR, ready to merge, or wrap this up.
 disable-model-invocation: true
 ---
 # ship-pr

@@ -1,6 +1,6 @@
 ---
 name: bootstrap-project
-description: Stand up a new app end to end on the default stack — repo from template, Neon project and branches, Neon Auth, Go Lambda API, Cloudflare frontend, R2 bucket, CI with GitHub OIDC, budgets and alerts. Use when the user says new project, bootstrap, scaffold, set up the stack, or create a new app.
+description: Claude Code only: Stand up a new app end to end on the default stack — repo from template, Neon project and branches, Neon Auth, Go Lambda API, Cloudflare frontend, R2 bucket, CI with GitHub OIDC, budgets and alerts. Use when the user says new project, bootstrap, scaffold, set up the stack, or create a new app.
 disable-model-invocation: true
 ---
 # bootstrap-project
@@ -13,4 +13,4 @@ Guardrails during bootstrap:
 - All CI deploys use GitHub OIDC → IAM role (no long-lived AWS keys). Cloudflare/Neon tokens are scoped per environment and stored as GitHub environment secrets / in the secrets manager.
 - Add Budgets + alerts and log retention before any traffic.
 
-Assets: `assets/workflows/*.yml` (CI, preview DB branch, staging/prod deploy) and `assets/go-api/` (Lambda-ready Go skeleton with the JWKS `auth.Verifier`). Copy and adapt; pin all versions and GitHub Action SHAs.
+Assets: `assets/go-api/` (Lambda-ready Go skeleton with the JWKS `auth.Verifier`). Copy and adapt; pin all versions. CI/CD workflows already live in `.github/workflows/` (action SHAs pinned, deploy jobs inert until the repo variables are set).

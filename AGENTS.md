@@ -13,21 +13,25 @@
 
 
 
-## Commands (TODO: fill in)
+## Commands
+
+Valid once `bootstrap-project` has run (the bare template has no `web/` or `api/`). Run from the repo root; root `package.json` scripts target `web/`. Adjust here if an app deviates.
 
 - install: `pnpm install`
-- dev: `pnpm dev`            | api local: `go run ./api/cmd/local`
-- test: `pnpm test`          | `go test ./... -race`
-- lint: `pnpm lint`          | `golangci-lint run`
+- dev: `pnpm dev`            | api local: `cd api && go run ./cmd/local`
+- test: `pnpm test`          | `cd api && go test ./... -race`
+- lint: `pnpm lint`          | `cd api && golangci-lint run`
 - typecheck: `pnpm typecheck`
 - e2e: `pnpm e2e`
-- migrate: `goose -dir db/migrations postgres "$DATABASE_URL" up`
+- migrate (dev/staging only): `goose -dir db/migrations postgres "$DATABASE_URL" up`
 
 
 
-## Architecture map (TODO)
+## Architecture map
 
-- `web/` frontend · `api/` Go Lambda API · `db/migrations/` SQL migrations · `infra/` IaC · `docs/` ADRs, handoffs, runbooks
+- `web/` frontend · `api/` Go Lambda API (own `go.mod`) · `db/migrations/` SQL migrations (goose) · `infra/` IaC · `docs/` ADRs, handoffs, runbooks, design tokens
+- `.claude/skills/` shared skills (Claude + Cursor) · `.claude/agents|hooks|settings.json` Claude-only · `.cursor/` Cursor-only · `.github/` CI/CD, CODEOWNERS, PR template
+- Skills whose description starts with "Claude Code only:" orchestrate subagents; Cursor should not run them.
 
 
 
@@ -43,7 +47,8 @@
 8. **Small diffs.** No drive-by refactors. If you notice unrelated problems, list them; don't fix them.
 9. **Cost hygiene:** no NAT Gateway, ALB, always-on Fargate, or VPC-attached Lambda without an ADR. Set a short retention on every CloudWatch log group. Prefer scale-to-zero.
 10. **UI:** follow `my-design`; run `ui-review` before merging UI changes; meet WCAG 2.2 AA.
-11. **Don't guess** — if the plan or handoff is ambiguous, stop and ask rather than invent requirements.
+11. **Guardrails differ per tool:** `.claude/settings.json` and hooks don't govern Cursor. Cursor command approval/sandbox is configured per `docs/runbooks/cursor-guardrails.md`; CI, branch protection, and staging-only credentials are the shared backstop.
+12. **Don't guess** — if the plan or handoff is ambiguous, stop and ask rather than invent requirements.
 
 
 

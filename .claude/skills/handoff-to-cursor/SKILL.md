@@ -1,6 +1,6 @@
 ---
 name: handoff-to-cursor
-description: Write a tight implementation brief for Cursor from an approved plan. Use when the user says hand off, give to Cursor, "write the brief", or when a plan has well-scoped tasks ready to implement at the desk.
+description: Claude Code only: Write a tight implementation brief for Cursor from an approved plan. Use when the user says hand off, give to Cursor, "write the brief", or when a plan has well-scoped tasks ready to implement at the desk.
 ---
 # handoff-to-cursor
 

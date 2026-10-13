@@ -12,4 +12,4 @@ Review and report (blocker / should-fix / nit) with file:line:
 - **Secrets:** none in repo/logs; per-env scoped tokens; rotation plan; no `.env` in images.
 - **Cloud:** least-privilege IAM (no `*`), per-env accounts, GitHub OIDC (no long-lived keys), Budgets alerts, log retention, public Function URL exposure.
 - **Supply chain:** pinned dependency versions and GitHub Action SHAs; review third-party skills/MCP servers before enabling (they can run code); Dependabot/Renovate.
-- **Agents:** hooks and permission denies still in place; deployer scoped to staging.
+- **Agents:** Claude hooks/permission denies and Cursor command approval/sandbox settings still in place; agent credentials scoped to dev/staging.

@@ -1,0 +1,12 @@
+# Default owner; replace with a team (@org/team) when the repo moves to an org.
+*                      @KoJaco
+
+# Agent guardrails, CI, and anything that can reach production need an explicit owner review.
+/AGENTS.md             @KoJaco
+/CLAUDE.md             @KoJaco
+/.claude/              @KoJaco
+/.cursor/              @KoJaco
+/.mcp.json             @KoJaco
+/.github/              @KoJaco
+/db/migrations/        @KoJaco
+/infra/                @KoJaco
