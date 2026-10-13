@@ -1,0 +1,31 @@
+# secrets
+.env
+.env.*
+!.env.example
+secrets/
+
+# local agent state
+.claude/settings.local.json
+.claude/worktrees/
+.cursor/*.local.*
+
+# installer artifacts (not part of the template)
+aws/
+awscliv2.zip
+
+# deps / build
+node_modules/
+dist/
+.next/
+.open-next/
+.wrangler/
+coverage/
+playwright-report/
+test-results/
+*.test.out
+bin/
+
+# os / editor
+.DS_Store
+.idea/
+.vscode/

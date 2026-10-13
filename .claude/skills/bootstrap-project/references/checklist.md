@@ -7,9 +7,9 @@ Legend: 🤖 agent can do · 👤 human only · ✋ ask first
 
 ## 1. Repo
 - 🤖 `git init`, monorepo layout: `web/`, `api/`, `db/migrations/`, `infra/`, `docs/`.
-- 🤖 Copy the agentic kit (AGENTS.md, CLAUDE.md, `.claude/`, `.cursor/`), fill TODOs in AGENTS.md.
-- 🤖 Copy `docs/design/tokens.md` from `my-design` template and fill it in.
-- 🤖 Add `.gitignore` (env files, `.open-next`, build output), Dependabot/Renovate config, pre-commit.
+- 🤖 Repo is created from this template (agentic kit already present); fill in the app-specific bits of AGENTS.md.
+- 🤖 Fill in `docs/design/tokens.md` (seeded from the `my-design` template).
+- 🤖 `.gitignore` and `.github/dependabot.yml` ship with the template; enable the npm/gomod Dependabot entries once `web/` and `api/` exist.
 - 👤 Create GitHub repo + branch protection (require CI + review on `main`); create `staging` and `production` Environments (production: required reviewers).
 
 ## 2. Neon (DB + auth)
@@ -35,13 +35,16 @@ Legend: 🤖 agent can do · 👤 human only · ✋ ask first
 - 🤖 R2 bucket per env (or S3 if decided); CORS for presigned uploads; scoped credentials; lifecycle rules.
 
 ## 6. CI/CD
-- 🤖 Copy `assets/workflows/` → `.github/workflows/`; fill placeholders (account ids, role ARNs, project ids); pin action SHAs.
+- 🤖 Workflows are already in `.github/workflows/` (SHAs pinned; Dependabot keeps them current). Set repo/Environment variables to activate: `STAGING_FUNCTION_NAME`, `PROD_FUNCTION_NAME`, `NEON_STAGING_PROJECT_ID`, `AWS_REGION`, role ARNs, URLs, `CLOUDFLARE_ACCOUNT_ID`; secrets per Environment. Add `packageManager` to `package.json` (pnpm/action-setup needs it).
+- 👤 Branch protection on `main`: require PR, review, and the `ci-ok` check; enable the `production` Environment with required reviewers. Update `CODEOWNERS` if the repo moves to an org.
 - Flow: PR → CI + preview DB branch → merge → staging deploy → manual approval → production deploy.
 
 ## 7. Agent guardrails
 - 🤖 Confirm `.claude/settings.json` allow/ask/deny and hooks work (try a blocked command; try reading `.env`).
 - 🤖 Document environments + account ids in `docs/runbooks/environments.md` (used by `deployer` pre-flight).
-- 🤖 Install browser tooling: Playwright MCP/CLI, Chrome DevTools MCP (dedicated profile).
+- 🤖 Browser tooling: Playwright + Chrome DevTools MCP are pinned in `.mcp.json` and `.cursor/mcp.json` (keep identical; dedicated browser profile).
+- 👤 Configure Cursor command approval + sandbox: see `docs/runbooks/cursor-guardrails.md` (not covered by `.claude/settings.json`).
+- 🤖 Prerequisite: `jq` installed (hooks fail closed without it).
 
 ## 8. Verify
 - 🤖 Smoke: `/healthz`, signup/login, authenticated call, file upload via presigned URL.

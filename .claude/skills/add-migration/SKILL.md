@@ -4,7 +4,12 @@ description: Create a safe Postgres schema migration (tables, columns, indexes, 
 ---
 # add-migration
 
-Delegate execution to the `migration-guard` subagent.
+Flow:
+1. Create a throwaway Neon branch from the **staging** project's `main` (name: `mig-<task>`). Use its connection string only for this task; never touch production.
+2. Write the migration (rules below).
+3. Apply up, run the test suite against the branch, apply down, apply up again (rollback/idempotency check).
+4. Report lock risk, expected duration on large tables, rollback plan, and data-loss risk.
+5. Delete the throwaway branch when done.
 
 Rules:
 - Plain SQL in `db/migrations/NNNN_<slug>.sql` (goose: `-- +goose Up` / `-- +goose Down`). **Portable Postgres only** — no provider-specific features (so we can move Neon ⇄ Supabase).

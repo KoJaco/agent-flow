@@ -1,6 +1,6 @@
 ---
 name: handoff-from-cursor
-description: Take over a task Cursor couldn't finish. Use when the user says Cursor is stuck, a `-blocked.md` handoff exists, tests keep failing after repeated attempts, or a tricky bug/refactor needs a fresh pair of eyes.
+description: Claude Code only: Take over a task Cursor couldn't finish. Use when the user says Cursor is stuck, a `-blocked.md` handoff exists, tests keep failing after repeated attempts, or a tricky bug/refactor needs a fresh pair of eyes.
 ---
 # handoff-from-cursor
 

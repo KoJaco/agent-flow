@@ -8,6 +8,6 @@ description: Systematically reproduce, isolate, and fix a bug with a regression 
 2. **Scope:** what changed recently (`git log`, deploy history)? Which layer — web, Worker, Lambda, DB, auth, network?
 3. **Isolate:** bisect (git bisect or toggling flags), minimise the repro, check the cheapest hypotheses first (config/env, auth token claims, CORS, cold start, pooled-connection settings, timeouts).
 4. **Fix root cause**, not the symptom; smallest change.
-5. **Regression test** that fails before and passes after (`test-writer`).
+5. **Regression test** that fails before and passes after.
 6. **Verify** on staging with the original repro; note rollback.
 7. Write a 3-line postmortem in the PR: cause, fix, how to detect sooner. Propose a guardrail (test, lint rule, alert) when the class of bug can recur.
