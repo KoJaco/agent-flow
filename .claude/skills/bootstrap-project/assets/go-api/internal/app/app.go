@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -35,21 +36,26 @@ func NewHandler(ctx context.Context) (http.Handler, error) {
 	}
 	_ = pool // pass into services/repos
 
-	r := chi.NewRouter()
-	r.Use(middleware.RequestID, middleware.Recoverer, middleware.Timeout(25_000_000_000))
-	r.Use(auth.OriginSecret(os.Getenv("ORIGIN_SECRET")))
+	return NewRouter(v, os.Getenv("ORIGIN_SECRET")), nil
+}
 
-	r.Get("/healthz", func(w http.ResponseWriter, _ *http.Request) { w.Write([]byte("ok")) })
+// NewRouter is the pure wiring (no env, no network), so routes and middleware are testable with a fake Verifier.
+func NewRouter(v auth.Verifier, originSecret string) http.Handler {
+	r := chi.NewRouter()
+	r.Use(middleware.RequestID, middleware.Recoverer, middleware.Timeout(25*time.Second))
+	r.Use(auth.OriginSecret(originSecret))
+
+	r.Get("/healthz", func(w http.ResponseWriter, _ *http.Request) { _, _ = w.Write([]byte("ok")) })
 
 	r.Route("/v1", func(r chi.Router) {
 		r.Use(auth.Middleware(v))
 		r.Get("/me", func(w http.ResponseWriter, req *http.Request) {
 			c, _ := auth.FromContext(req.Context())
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(map[string]string{"sub": c.Subject, "email": c.Email})
+			_ = json.NewEncoder(w).Encode(map[string]string{"sub": c.Subject, "email": c.Email})
 		})
 	})
-	return r, nil
+	return r
 }
 
 func mustEnv(k string) string {

@@ -13,4 +13,4 @@ Guardrails during bootstrap:
 - All CI deploys use GitHub OIDC → IAM role (no long-lived AWS keys). Cloudflare/Neon tokens are scoped per environment and stored as GitHub environment secrets / in the secrets manager.
 - Add Budgets + alerts and log retention before any traffic.
 
-Assets: `assets/go-api/` (Lambda-ready Go skeleton with the JWKS `auth.Verifier`). Copy and adapt; pin all versions. CI/CD workflows already live in `.github/workflows/` (action SHAs pinned, deploy jobs inert until the repo variables are set).
+Assets: `assets/go-api/` (tested, Lambda-ready Go skeleton with the JWKS `auth.Verifier`, pinned `go.mod`, `.golangci.yml`) and `assets/web/` (root `package.json` + `pnpm-workspace.yaml` with the scripts AGENTS.md assumes, `wrangler.jsonc` with staging/production envs). Copy and adapt; pin all versions. CI/CD workflows already live in `.github/workflows/` (action SHAs pinned, deploy jobs inert until the repo variables are set).
