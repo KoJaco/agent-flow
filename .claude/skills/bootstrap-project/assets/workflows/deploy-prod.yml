@@ -1,0 +1,54 @@
+# Production: manual or tag-triggered, behind the `production` Environment (required reviewers = human approval gate).
+name: deploy-prod
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: deploy-production
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with: { go-version-file: api/go.mod }
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_PROD_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+      - name: Record previous version (rollback target)
+        run: |
+          PREV=$(aws lambda get-alias --function-name "${{ vars.PROD_FUNCTION_NAME }}" --name live --query FunctionVersion --output text)
+          echo "Rollback: aws lambda update-alias --function-name ${{ vars.PROD_FUNCTION_NAME }} --name live --function-version $PREV" >> "$GITHUB_STEP_SUMMARY"
+      - name: Migrate production DB (expand-only migrations!)
+        env:
+          DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
+        run: |
+          go install github.com/pressly/goose/v3/cmd/goose@<PINNED_VERSION>
+          goose -dir db/migrations postgres "$DATABASE_URL" up
+      - name: Build + deploy API
+        working-directory: api
+        run: |
+          GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -tags lambda.norpc -o bootstrap ./cmd/lambda
+          zip function.zip bootstrap
+          aws lambda update-function-code --function-name "${{ vars.PROD_FUNCTION_NAME }}" --zip-file fileb://function.zip --architectures arm64
+          aws lambda wait function-updated --function-name "${{ vars.PROD_FUNCTION_NAME }}"
+          VERSION=$(aws lambda publish-version --function-name "${{ vars.PROD_FUNCTION_NAME }}" --query Version --output text)
+          aws lambda update-alias --function-name "${{ vars.PROD_FUNCTION_NAME }}" --name live --function-version "$VERSION"
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN_PROD }}
+          accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: web
+          command: deploy --env production
+      - name: Smoke test
+        run: curl -fsS "${{ vars.PROD_API_URL }}/healthz"

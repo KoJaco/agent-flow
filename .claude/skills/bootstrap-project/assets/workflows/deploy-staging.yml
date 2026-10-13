@@ -1,0 +1,52 @@
+name: deploy-staging
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+  id-token: write          # GitHub OIDC -> AWS (no long-lived keys)
+concurrency:
+  group: deploy-staging
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with: { go-version-file: api/go.mod }
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_STAGING_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+      - name: Migrate staging DB
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+        run: |
+          go install github.com/pressly/goose/v3/cmd/goose@<PINNED_VERSION>
+          goose -dir db/migrations postgres "$DATABASE_URL" up
+      - name: Build + deploy API (Lambda arm64)
+        working-directory: api
+        run: |
+          GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -tags lambda.norpc -o bootstrap ./cmd/lambda
+          zip function.zip bootstrap
+          aws lambda update-function-code --function-name "${{ vars.STAGING_FUNCTION_NAME }}" --zip-file fileb://function.zip --architectures arm64
+          aws lambda wait function-updated --function-name "${{ vars.STAGING_FUNCTION_NAME }}"
+          VERSION=$(aws lambda publish-version --function-name "${{ vars.STAGING_FUNCTION_NAME }}" --query Version --output text)
+          aws lambda update-alias --function-name "${{ vars.STAGING_FUNCTION_NAME }}" --name live --function-version "$VERSION"
+          echo "Deployed staging API version $VERSION" >> "$GITHUB_STEP_SUMMARY"
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - name: Deploy web to Cloudflare (staging)
+        uses: cloudflare/wrangler-action@v3     # TODO: pin
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN_STAGING }}
+          accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: web
+          command: deploy --env staging           # Next.js: build with OpenNext first
+      - name: Smoke test
+        run: |
+          curl -fsS "${{ vars.STAGING_API_URL }}/healthz"
+          curl -fsS "${{ vars.STAGING_WEB_URL }}" > /dev/null

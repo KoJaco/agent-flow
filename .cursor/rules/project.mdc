@@ -1,0 +1,10 @@
+---
+description: Project rules for Cursor — defer to AGENTS.md
+alwaysApply: true
+---
+Read and follow `AGENTS.md` at the repo root before making changes.
+
+- Implement from the handoff file in `docs/handoffs/` when one exists; do not widen scope.
+- Never touch `.env*`, secrets, production resources, or deploy anything.
+- Run lint, typecheck, and tests before declaring done.
+- If blocked after two honest attempts, write `docs/handoffs/<task>-blocked.md` using `docs/handoffs/_TEMPLATE.md` (sections: tried, errors, hypotheses) and stop so Claude can take over.

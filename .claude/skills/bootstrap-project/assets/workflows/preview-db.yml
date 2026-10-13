@@ -1,0 +1,36 @@
+# Per-PR disposable Neon branch in the STAGING project. Verify neonctl flags against current docs.
+name: preview-db
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, closed]
+concurrency:
+  group: preview-db-${{ github.event.number }}
+permissions:
+  contents: read
+env:
+  NEON_API_KEY: ${{ secrets.NEON_API_KEY_STAGING }}      # scoped to the staging project only
+  NEON_PROJECT_ID: ${{ vars.NEON_STAGING_PROJECT_ID }}
+  BRANCH: pr-${{ github.event.number }}
+jobs:
+  create:
+    if: github.event.action != 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with: { go-version-file: api/go.mod }
+      - name: Create or reuse branch
+        run: |
+          npx -y neonctl@<PINNED_VERSION> branches get "$BRANCH" --project-id "$NEON_PROJECT_ID" \
+            || npx -y neonctl@<PINNED_VERSION> branches create --project-id "$NEON_PROJECT_ID" --name "$BRANCH" --parent main
+      - name: Migrate preview branch
+        run: |
+          DATABASE_URL=$(npx -y neonctl@<PINNED_VERSION> connection-string "$BRANCH" --project-id "$NEON_PROJECT_ID" --pooled)
+          echo "::add-mask::$DATABASE_URL"
+          go install github.com/pressly/goose/v3/cmd/goose@<PINNED_VERSION>
+          goose -dir db/migrations postgres "$DATABASE_URL" up
+  delete:
+    if: github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - run: npx -y neonctl@<PINNED_VERSION> branches delete "$BRANCH" --project-id "$NEON_PROJECT_ID"
