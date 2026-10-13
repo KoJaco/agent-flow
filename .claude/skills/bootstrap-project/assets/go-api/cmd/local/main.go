@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"example.com/app/internal/app"
 )
@@ -17,7 +18,8 @@ func main() {
 	}
 	addr := ":" + envOr("PORT", "8080")
 	log.Printf("listening on %s", addr)
-	log.Fatal(http.ListenAndServe(addr, h))
+	srv := &http.Server{Addr: addr, Handler: h, ReadHeaderTimeout: 10 * time.Second}
+	log.Fatal(srv.ListenAndServe())
 }
 
 func envOr(k, d string) string {

@@ -20,7 +20,8 @@ Legend: 🤖 agent can do · 👤 human only · ✋ ask first
 - 👤 Configure OAuth apps (Google/GitHub) in provider consoles; paste client ids/secrets into the secrets manager.
 
 ## 3. Go API on Lambda
-- 🤖 Copy `assets/go-api/` → `api/`; `go mod init`; add deps (`chi`, `pgx`, `aws-lambda-go`, `aws-lambda-go-api-proxy`, `keyfunc/v3`, `golang-jwt/jwt/v5`); pin versions.
+- 🤖 Copy `assets/go-api/` → `api/` and rename the module (steps in its README); deps are already pinned in `go.mod`. Run `go vet`, `go test -race`, `golangci-lint run` before changing anything.
+- 🤖 Copy `assets/web/package.json` + `pnpm-workspace.yaml` to the repo root and `wrangler.jsonc` into `web/`; set names, API URLs and the compatibility date.
 - 🤖 IaC (proposal: AWS CDK in TypeScript under `infra/`) for: Lambda (arm64, `provided.al2023`, 256–512 MB), `live` alias, Function URL (auth NONE; app verifies JWT + origin secret) or API Gateway HTTP API if WAF/throttling is needed, IAM role (least privilege), **CloudWatch log group with 14-day retention**, AWS Budgets + alert + optional budget action.
 - ✋ Create the staging AWS account / role; production later.
 - 🤖 GitHub OIDC provider + deploy roles per account (trust limited to repo + environment).

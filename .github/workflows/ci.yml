@@ -1,5 +1,6 @@
 # Required status check for branch protection: `ci-ok`.
 # Jobs self-skip until web/ (package.json) or api/ (go.mod) exist, so the bare template stays green.
+# `skeleton` always runs: it tests the Go reference skeleton shipped in bootstrap-project/assets.
 name: ci
 on:
   pull_request:
@@ -48,9 +49,19 @@ jobs:
       - run: go vet ./...
       - run: go test ./... -race
       - run: GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -tags lambda.norpc -o /tmp/bootstrap ./cmd/lambda
+  # Keeps the Go reference skeleton honest (it is copied into api/ by bootstrap-project).
+  skeleton:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: .claude/skills/bootstrap-project/assets/go-api } }
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
+        with: { go-version-file: .claude/skills/bootstrap-project/assets/go-api/go.mod }
+      - run: go vet ./...
+      - run: go test ./... -race
   ci-ok:
     if: always()
-    needs: [detect, web, api]
+    needs: [detect, web, api, skeleton]
     runs-on: ubuntu-latest
     steps:
       - name: Fail if any required job failed or was cancelled
